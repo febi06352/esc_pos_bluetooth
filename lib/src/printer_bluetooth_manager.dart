@@ -244,7 +244,7 @@ class PrinterBluetoothManager {
 
     for(int lp =0;lp<_ListPrinter.length;lp++){
       try{
-        _runDelayed(3).then((dynamic v) async {
+        _runDelayed(4).then((dynamic v) async {
           await _listBManager[lp].disconnect();
           _isPrinting = false;
         });
@@ -253,15 +253,17 @@ class PrinterBluetoothManager {
       }
     }
 
-    if(time_out){
-      completer.complete(PosPrintResult.timeout);
-    }else {
-      completer.complete(PosPrintResult.success);
+    if (!completer.isCompleted) {
+      if (time_out) {
+        completer.complete(PosPrintResult.timeout);
+      } else {
+        completer.complete(PosPrintResult.success);
+      }
     }
 
     // Printing timeout
     _runDelayed(timeout).then((dynamic v) async {
-      if (_isPrinting) {
+      if (_isPrinting && !completer.isCompleted) {
         _isPrinting = false;
         completer.complete(PosPrintResult.timeout);
       }
